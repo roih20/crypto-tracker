@@ -1,8 +1,41 @@
 ---
 import Layout from "@layouts/Layout.astro";
+import { getAllRows, type CryptoRow } from "../db/queries";
+
+process.env.SUPABASE_URL ??= import.meta.env.SUPABASE_URL;
+process.env.SUPABASE_KEY ??= import.meta.env.SUPABASE_KEY;
+
+
+let allRows: CryptoRow[] = [];
+
+try {
+	allRows = await getAllRows();
+	const grouped = new Map<string, { price: number, trackedAt: string }[]>();
+	for (const row of allRows) {
+		const { price, trackedAt, crypto } = row;
+		const list = grouped.get(crypto) ?? [];
+		list.push({ price, trackedAt });
+		grouped.set(crypto, list);
+	}
+	for (const [coin, data] of grouped) {
+		console.log(`Data for ${coin}:`, data);
+	}
+} catch (error) {
+	if (error instanceof Error) {
+		console.error("Error fetching data:", error.message);
+	} 
+}
 
 ---
 
 <Layout>
-	<h1 class="text-5xl font-bold text-green-700">Astro</h1>
+	<main>
+		<header class="flex items-center justify-center py-4 border-b border-gray-700">
+			<h1 class="text-xl font-semibold text-white">CryptoTrack</h1>
+		</header>
+		<section class="p-4">
+			<h2 class="font-medium text-white/90 mb-2">Market Overview</h2>
+			<p class="text-gray-300 leading-7 text-sm">Track the prices of Bitcoin, Ethereum, and Solana in real time.</p>
+		</section>
+	</main>
 </Layout>

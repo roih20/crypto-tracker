@@ -7,6 +7,12 @@ export type CryptoData = {
   trackedAt: string;
 };
 
+export type CryptoRow = {
+  crypto: string;
+  price: number;
+  trackedAt: string;
+};
+
 export const save = async (data: CryptoData[]) => {
   const supabase = getDb();
 
@@ -22,4 +28,18 @@ export const save = async (data: CryptoData[]) => {
   if (error) {
     throw new Error(error.message);
   }
+};
+
+export const getAllRows = async (): Promise<CryptoRow[]> => {
+  const supabase = getDb();
+
+  const { data, error } = await supabase
+    .from("crypto_tracer")
+    .select("crypto, price, trackedAt");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as CryptoRow[];
 };
