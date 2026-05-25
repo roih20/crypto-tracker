@@ -7,6 +7,9 @@ process.env.SUPABASE_KEY ??= import.meta.env.SUPABASE_KEY;
 
 
 let allRows: CryptoRow[] = [];
+let coins: Record<string, { price: number, time: string }[]> = {};
+let latestPrices: Record<string, number> = {};
+let chartError: string | null = null;
 
 try {
 	allRows = await getAllRows();
@@ -18,13 +21,13 @@ try {
 		grouped.set(crypto, list);
 	}
 	for (const [coin, data] of grouped) {
-		console.log(`Data for ${coin}:`, data);
+		coins[coin] = data.map(({ price, trackedAt }) => ({ price, time: trackedAt }));
+		latestPrices[coin] = data[data.length - 1].price;
 	}
 } catch (error) {
-	if (error instanceof Error) {
-		console.error("Error fetching data:", error.message);
-	} 
+	chartError = error instanceof Error ? error.message : "Connection error";
 }
+
 
 ---
 
@@ -36,6 +39,68 @@ try {
 		<section class="p-4">
 			<h2 class="font-medium text-white/90 mb-2">Market Overview</h2>
 			<p class="text-gray-300 leading-7 text-sm">Track the prices of Bitcoin, Ethereum, and Solana in real time.</p>
+			{chartError ? (
+				<div class="bg-red-500/10 text-red-400 p-4 rounded-lg mt-4">
+					{chartError}
+				</div>
+			) : (
+			 <div class="flex flex-col gap-y-4 mt-4">
+			  {
+					Object.entries(coins).map(([coin, data]) => (
+						<div class="p-4 card rounded-lg flex items-center gap-x-4">
+							<div class="">
+								<h3 class="text-sm text-white/80 uppercase">{coin}</h3>
+								<p class="text-xl font-semibold text-white mt-2 tracking-widest">${latestPrices[coin]}</p>
+							</div>
+							<div id={`chart-${coin}`} class="flex-1" data-chart={JSON.stringify(data)}>
+								{/* Chart will be rendered here */}
+
+							</div>
+						</div>
+					))
+				}
+			 </div>
+			)}
 		</section>
 	</main>
 </Layout>
+
+<style>
+	.card {
+		background: hsl(224, 47%, 10%);
+	}
+</style>
+
+<script>
+
+	document.addEventListener("DOMContentLoaded", async () => {
+		const { createChart, AreaSeries} = await import("lightweight-charts");
+
+		const chartContainers = document.querySelectorAll("[data-chart]");
+
+		for (const cointainer of chartContainers) {
+			const data = JSON.parse(cointainer.getAttribute("data-chart") || "[]");
+			const parsedData = data.map(({ price, time }: { price: number, time: string }) => ({
+				value: price,
+				time: Math.floor(new Date(time).getTime() / 1000)
+			}))
+			.sort((a: { time: number }, b: { time: number }) => a.time - b.time);
+			
+			const chartInstance = createChart(cointainer as HTMLElement, {
+				width: 200,
+				height: 100,
+				layout: {
+					textColor: "white",
+					background: {
+						color: "transparent"
+					 }
+				}
+			})
+
+			const areaSeries = chartInstance.addSeries(AreaSeries, { lineColor: '#2962FF', topColor: '#2962FF', bottomColor: 'rgba(41, 98, 255, 0.28)'});
+			areaSeries.setData(parsedData);
+			chartInstance.timeScale().fitContent();
+		}
+		
+	})
+</script>
