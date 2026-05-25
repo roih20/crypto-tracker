@@ -1,7 +1,5 @@
 import { save, type CryptoData } from "../db/queries.ts";
 
-process.loadEnvFile();
-
 const cryptoTracker = async (coins: string[]): Promise<CryptoData[]> => {
   const url = `https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coins.join(",")}&precision=2`;
   const key = process.env.COIN_GECKO_API_KEY;
