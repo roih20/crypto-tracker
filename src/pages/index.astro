@@ -6,13 +6,13 @@ process.env.SUPABASE_URL ??= import.meta.env.SUPABASE_URL;
 process.env.SUPABASE_KEY ??= import.meta.env.SUPABASE_KEY;
 
 
-let allRows: CryptoRow[] = [];
+
 let coins: Record<string, { price: number, time: string }[]> = {};
 let latestPrices: Record<string, number> = {};
 let chartError: string | null = null;
 
 try {
-	allRows = await getAllRows();
+	const allRows = await getAllRows();
 	const grouped = new Map<string, { price: number, trackedAt: string }[]>();
 	for (const row of allRows) {
 		const { price, trackedAt, crypto } = row;
@@ -47,14 +47,13 @@ try {
 			 <div class="flex flex-col gap-y-4 mt-4">
 			  {
 					Object.entries(coins).map(([coin, data]) => (
-						<div class="p-4 card rounded-lg flex items-center gap-x-4">
-							<div class="">
-								<h3 class="text-sm text-white/80 uppercase">{coin}</h3>
-								<p class="text-xl font-semibold text-white mt-2 tracking-widest">${latestPrices[coin]}</p>
-							</div>
-							<div id={`chart-${coin}`} class="flex-1" data-chart={JSON.stringify(data)}>
-								{/* Chart will be rendered here */}
+						<div class="px-2 py-4 card rounded-lg flex flex-col gap-y-2">
+							<h3 class="text-sm text-white/80 uppercase">{coin}</h3>
+							<div class="flex items-center gap-x-2">
+								<p class="text-xl font-semibold text-white mt-2 w-28 tracking-wider">${latestPrices[coin]}</p>
+								<div id={`chart-${coin}`} class="h-32 w-full flex-1" data-chart={JSON.stringify(data)}>
 
+								</div>
 							</div>
 						</div>
 					))
@@ -76,28 +75,52 @@ try {
 	document.addEventListener("DOMContentLoaded", async () => {
 		const { createChart, AreaSeries} = await import("lightweight-charts");
 
-		const chartContainers = document.querySelectorAll("[data-chart]");
+		const elements = document.querySelectorAll("[data-chart]");
 
-		for (const cointainer of chartContainers) {
-			const data = JSON.parse(cointainer.getAttribute("data-chart") || "[]");
+		const lineColorMapper: Record<string, { lineColor: string, topColor: string, bottomColor: string }> = {
+			bitcoin: { lineColor: '#d49640', topColor: '#F7931A', bottomColor: 'rgba(212, 150, 64, 0.3)' },
+			ethereum: { lineColor: '#3C3C3D', topColor: '#3C3C3D', bottomColor: 'rgba(60, 60, 61, 0.28)' },
+			solana: { lineColor: '#00FFA3', topColor: '#00FFA3', bottomColor: 'rgba(0, 255, 163, 0.28)' }
+		}
+
+		for (const el of elements) {
+			const data = JSON.parse(el.getAttribute("data-chart") || "[]");
+			// Extract the coin name from the element's ID (e.g., "chart-bitcoin" -> "bitcoin")
+			const coinName = el.getAttribute("id")?.substring(6).trim()!
 			const parsedData = data.map(({ price, time }: { price: number, time: string }) => ({
 				value: price,
 				time: Math.floor(new Date(time).getTime() / 1000)
 			}))
 			.sort((a: { time: number }, b: { time: number }) => a.time - b.time);
 			
-			const chartInstance = createChart(cointainer as HTMLElement, {
-				width: 200,
-				height: 100,
+			const chartInstance = createChart(el as HTMLElement, {
+				autoSize: true,
+				grid: {
+					vertLines: {
+						visible: false
+					},
+					horzLines: {
+						visible: false
+					}
+				},
+				rightPriceScale: {
+					borderVisible: false,
+					visible: false
+				},
+				timeScale: {
+					borderVisible: false,
+					visible: false
+				},
 				layout: {
-					textColor: "white",
 					background: {
-						color: "transparent"
-					 }
+						color: 'transparent'
+					}
 				}
+				
+				
 			})
 
-			const areaSeries = chartInstance.addSeries(AreaSeries, { lineColor: '#2962FF', topColor: '#2962FF', bottomColor: 'rgba(41, 98, 255, 0.28)'});
+			const areaSeries = chartInstance.addSeries(AreaSeries, lineColorMapper[coinName]);
 			areaSeries.setData(parsedData);
 			chartInstance.timeScale().fitContent();
 		}
