@@ -80,10 +80,10 @@ try {
 
 		const elements = document.querySelectorAll("[data-chart]");
 
-		const lineColorMapper: Record<string, { lineColor: string, topColor: string, bottomColor: string }> = {
-			bitcoin: { lineColor: '#d49640', topColor: '#F7931A', bottomColor: 'rgba(212, 150, 64, 0.3)' },
-			ethereum: { lineColor: '#3C3C3D', topColor: '#3C3C3D', bottomColor: 'rgba(60, 60, 61, 0.28)' },
-			solana: { lineColor: '#00FFA3', topColor: '#00FFA3', bottomColor: 'rgba(0, 255, 163, 0.28)' }
+		const areaSeriesOptions: Record<string, { lineColor: string, topColor: string, bottomColor: string }> = {
+			bitcoin: { lineColor: 'rgba(240, 165, 55, 1)', topColor: 'rgba(240, 165, 55, 0.35)', bottomColor: 'rgba(240, 165, 55, 0.05)' },
+			ethereum: { lineColor: 'rgba(118, 114, 240, 1)', topColor: 'rgba(118, 114, 240, 0.35)', bottomColor: 'rgba(118, 114, 240, 0.05)' },
+			solana: { lineColor: 'rgba(92, 231, 168, 1)', topColor: 'rgba(92, 231, 168, 0.35)', bottomColor: 'rgba(92, 231, 168, 0.05)' }
 		}
 
 		for (const el of elements) {
@@ -107,12 +107,11 @@ try {
 					}
 				},
 				rightPriceScale: {
-					borderVisible: false,
 					visible: false
-				},
+					
+				},	
 				timeScale: {
-					borderVisible: false,
-					visible: false
+					visible: false,
 				},
 				layout: {
 					background: {
@@ -123,7 +122,12 @@ try {
 				
 			})
 
-			const areaSeries = chartInstance.addSeries(AreaSeries, lineColorMapper[coinName]);
+			const areaSeries = chartInstance.addSeries(AreaSeries, {
+				lineColor: areaSeriesOptions[coinName]["lineColor"],
+				topColor: areaSeriesOptions[coinName]["topColor"],
+				bottomColor: areaSeriesOptions[coinName]["bottomColor"],
+				lineWidth: 2
+			});
 			areaSeries.setData(parsedData);
 			chartInstance.timeScale().fitContent();
 		}
