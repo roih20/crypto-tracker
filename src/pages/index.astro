@@ -2,6 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 import BitcoinLogo from "@assets/svg/bitcoin.svg";
 import EthereumLogo from "@assets/svg/ethereum.svg";
+import SolanaLogo from "@assets/svg/solana.svg";
 import { getAllRows, type CryptoRow } from "../db/queries";
 import type { SvgComponent } from "astro/types";
 
@@ -56,6 +57,8 @@ try {
 									<p class="text-2xl text-white mt-1">{latestPrices[coin]}</p>
 								</div>
 								{coin === "bitcoin" && <BitcoinLogo class="w-10 h-10" />}
+								{coin === "ethereum" && <EthereumLogo class="w-10 h-10" />}
+								{coin === "solana" && <SolanaLogo class="w-10 h-10" />}
 							</div>
 							<div id={`chart-${coin}`} class="h-32 w-full mt-1" data-chart={JSON.stringify(data)}></div>
 						</div>
@@ -98,6 +101,14 @@ try {
 			
 			const chartInstance = createChart(el as HTMLElement, {
 				autoSize: true,
+				crosshair: {
+					horzLine: {
+						visible: false
+					},
+					vertLine: {
+						visible: true
+					}
+				},
 				grid: {
 					vertLines: {
 						visible: false
@@ -126,7 +137,8 @@ try {
 				lineColor: areaSeriesOptions[coinName]["lineColor"],
 				topColor: areaSeriesOptions[coinName]["topColor"],
 				bottomColor: areaSeriesOptions[coinName]["bottomColor"],
-				lineWidth: 2
+				lineWidth: 2,
+				lineType: 2
 			});
 			areaSeries.setData(parsedData);
 			chartInstance.timeScale().fitContent();
