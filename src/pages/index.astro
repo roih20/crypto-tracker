@@ -1,14 +1,16 @@
 ---
 import Layout from "@layouts/Layout.astro";
+import BitcoinLogo from "@assets/svg/bitcoin.svg";
+import EthereumLogo from "@assets/svg/ethereum.svg";
 import { getAllRows, type CryptoRow } from "../db/queries";
+import type { SvgComponent } from "astro/types";
 
 process.env.SUPABASE_URL ??= import.meta.env.SUPABASE_URL;
 process.env.SUPABASE_KEY ??= import.meta.env.SUPABASE_KEY;
 
 
-
 let coins: Record<string, { price: number, time: string }[]> = {};
-let latestPrices: Record<string, number> = {};
+let latestPrices: Record<string, string> = {};
 let chartError: string | null = null;
 
 try {
@@ -22,7 +24,7 @@ try {
 	}
 	for (const [coin, data] of grouped) {
 		coins[coin] = data.map(({ price, trackedAt }) => ({ price, time: trackedAt }));
-		latestPrices[coin] = data[data.length - 1].price;
+		latestPrices[coin] = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(data[data.length - 1].price);
 	}
 } catch (error) {
 	chartError = error instanceof Error ? error.message : "Connection error";
@@ -47,14 +49,15 @@ try {
 			 <div class="flex flex-col gap-y-4 mt-4">
 			  {
 					Object.entries(coins).map(([coin, data]) => (
-						<div class="px-2 py-4 card rounded-lg flex flex-col gap-y-2">
-							<h3 class="text-sm text-white/80 uppercase">{coin}</h3>
-							<div class="flex items-center gap-x-2">
-								<p class="text-xl font-semibold text-white mt-2 w-28 tracking-wider">${latestPrices[coin]}</p>
-								<div id={`chart-${coin}`} class="h-32 w-full flex-1" data-chart={JSON.stringify(data)}>
-
+						<div class="p-4 card rounded-lg flex flex-col gap-y-2">
+							<div class="flex items-center">
+								<div class="w-full">
+									<h3 class="text-xl text-white font-semibold capitalize">{coin}</h3>
+									<p class="text-2xl text-white mt-1">{latestPrices[coin]}</p>
 								</div>
+								{coin === "bitcoin" && <BitcoinLogo class="w-10 h-10" />}
 							</div>
+							<div id={`chart-${coin}`} class="h-32 w-full mt-1" data-chart={JSON.stringify(data)}></div>
 						</div>
 					))
 				}
