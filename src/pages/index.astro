@@ -41,7 +41,7 @@ try {
 		</header>
 		<section class="p-4">
 			<h2 class="font-medium text-white/90 mb-2">Market Overview</h2>
-			<p class="text-gray-300 leading-7 text-sm">Track the prices of Bitcoin, Ethereum, and Solana in real time.</p>
+			<p class="text-gray-300 leading-7 text-sm">Track the price of various cryptocurrencies in real time.</p>
 			{chartError ? (
 				<div class="bg-red-500/10 text-red-400 p-4 rounded-lg mt-4">
 					{chartError}
@@ -50,19 +50,21 @@ try {
 			 <div class="flex flex-col gap-y-4 mt-4">
 			  {
 					Object.entries(coins).map(([coin, data]) => (
-						<div class="p-4 card rounded-lg flex flex-col gap-y-2">
-							<div class="flex items-center">
-								<div class="w-full">
-									<h3 class="text-xl text-white font-semibold capitalize">{coin}</h3>
-									<p id={`latest-price-${coin}`} class="text-2xl text-white mt-1">{latestPrices[coin]}</p>
+						<div class="px-3 py-4 card rounded-lg flex flex-col gap-y-2">
+							<div class="flex gap-x-3">
+								<div class="flex gap-x-2 w-32">
+									{coin === "bitcoin" && <BitcoinLogo class="w-7 h-7 mt-3" />}
+									{coin === "ethereum" && <EthereumLogo class="w-7 h-7 mt-3" />}
+									{coin === "solana" && <SolanaLogo class="w-7 h-7 mt-3" />}
+									<div>
+										<h3 class="text-white font-semibold capitalize">{coin}</h3>
+										<p id={`latest-price-${coin}`} class="text-lg font-medium text-white mt-1">{latestPrices[coin]}</p>
+									</div>
 								</div>
-								{coin === "bitcoin" && <BitcoinLogo class="w-10 h-10" />}
-								{coin === "ethereum" && <EthereumLogo class="w-10 h-10" />}
-								{coin === "solana" && <SolanaLogo class="w-10 h-10" />}
-							</div>
-							<div class="relative mt-4">
-								<div id={`chart-${coin}`} class="h-32 w-full" data-chart={JSON.stringify(data)}></div>
-								<div id={`tooltip-${coin}`} class="tooltip top-3 left-3 p-2 rounded-xl text-xs z-20" style="display: none;"></div>
+								<div class="relative flex-1 overflow-hidden">
+									<div id={`chart-${coin}`} class="h-32 w-full" data-chart={JSON.stringify(data)}></div>
+									<div id={`tooltip-${coin}`} class="tooltip top-3 left-3 p-2 rounded-xl text-xs z-20" style="display: none;"></div>
+								</div>
 							</div>
 						</div>
 					))
@@ -94,8 +96,11 @@ try {
 
 		const areaSeriesOptions: Record<string, { lineColor: string, topColor: string, bottomColor: string }> = {
 			bitcoin: { lineColor: 'rgba(240, 165, 55, 1)', topColor: 'rgba(240, 165, 55, 0.25)', bottomColor: 'rgba(240, 165, 55, 0.05)' },
-			ethereum: { lineColor: 'rgba(118, 114, 240, 1)', topColor: 'rgba(118, 114, 240, 0.25)', bottomColor: 'rgba(118, 114, 240, 0.05)' },
-			solana: { lineColor: 'rgba(92, 231, 168, 1)', topColor: 'rgba(92, 231, 168, 0.25)', bottomColor: 'rgba(92, 231, 168, 0.05)' }
+			ethereum: { lineColor: 'rgba(75, 73, 239, 0.8)', topColor: 'rgba(75, 73, 239, 0.25)', bottomColor: 'rgba(75, 73, 239, 0.05)' },
+			solana: { lineColor: 'rgba(161, 46, 201, 0.8)', topColor: 'rgba(161, 46, 201, 0.25)', bottomColor: 'rgba(161, 46, 201, 0.05)' },
+			binancecoin: { lineColor: 'rgba(242, 240, 58, 0.8)', topColor: 'rgba(242, 240, 58, 0.25)', bottomColor: 'rgba(242, 240, 58, 0.05)' },
+			ripple: { lineColor: 'rgba(241, 241, 234, 0.8)', topColor: 'rgba(241, 241, 234, 0.25)', bottomColor: 'rgba(241, 241, 234, 0.05)' },
+			tether: { lineColor: 'rgba(34, 174, 88, 0.8)', topColor: 'rgba(34, 174, 88, 0.25)', bottomColor: 'rgba(34, 174, 88, 0.05)' },
 		}
 
 		for (const el of elements) {
