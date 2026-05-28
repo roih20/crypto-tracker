@@ -40,8 +40,8 @@ try {
 			<h1 class="text-xl font-semibold text-white">CryptoTrack</h1>
 		</header>
 		<section class="p-4">
-			<h2 class="font-medium text-white/90 mb-2">Market Overview</h2>
-			<p class="text-gray-300 leading-7 text-sm">Track the price of various cryptocurrencies in real time.</p>
+			<h2 class="font-medium text-white/90 mb-2 sm:text-lg">Market Overview</h2>
+			<p class="text-gray-300 leading-7 text-sm sm:text-base">Track the price of various cryptocurrencies in real time.</p>
 			{chartError ? (
 				<div class="bg-red-500/10 text-red-400 p-4 rounded-lg mt-4">
 					{chartError}
@@ -50,19 +50,23 @@ try {
 			 <div class="flex flex-col gap-y-4 mt-4">
 			  {
 					Object.entries(coins).map(([coin, data]) => (
-						<div class="px-3 py-4 card rounded-lg flex flex-col gap-y-2">
-							<div class="flex gap-x-3">
-								<div class="flex gap-x-2 w-32">
-									{coin === "bitcoin" && <BitcoinLogo class="w-7 h-7 mt-3" />}
-									{coin === "ethereum" && <EthereumLogo class="w-7 h-7 mt-3" />}
-									{coin === "solana" && <SolanaLogo class="w-7 h-7 mt-3" />}
-									<div>
-										<h3 class="text-white font-semibold capitalize">{coin}</h3>
-										<p id={`latest-price-${coin}`} class="text-lg font-medium text-white mt-1">{latestPrices[coin]}</p>
+						<div class="px-3 py-4 card rounded-lg flex flex-col gap-y-2 sm:h-48 md:h-56">
+							<div class="flex gap-x-3 h-full">
+								<div class="flex flex-col gap-y-2 w-32 sm:gap-x-4 sm:w-44 sm:mt-2 sm:ml-2">
+									<div class="flex items-center gap-x-2">
+										<div class="">
+											{coin === "bitcoin" && <BitcoinLogo class="w-7 h-7 sm:w-9 sm:h-9" />}
+											{coin === "ethereum" && <EthereumLogo class="w-7 h-7 sm:w-9 sm:h-9" />}
+											{coin === "solana" && <SolanaLogo class="w-7 h-7 sm:w-9 sm:h-9" />}
+										</div>
+										<h3 class="text-white font-semibold capitalize sm:text-xl">{coin}</h3>
+									</div>
+									<div class="flex-1 w-full">
+										<p id={`latest-price-${coin}`} class="text-lg font-medium text-white ml-1 sm:text-2xl">{latestPrices[coin]}</p>
 									</div>
 								</div>
 								<div class="relative flex-1 overflow-hidden">
-									<div id={`chart-${coin}`} class="h-32 w-full" data-chart={JSON.stringify(data)}></div>
+									<div id={`chart-${coin}`} class="h-32 w-full sm:h-full" data-chart={JSON.stringify(data)}></div>
 									<div id={`tooltip-${coin}`} class="tooltip top-3 left-3 p-2 rounded-xl text-xs z-20" style="display: none;"></div>
 								</div>
 							</div>
@@ -86,6 +90,9 @@ try {
 		background: hsl(224, 47%, 20%);
 		border: 1px solid hsl(224, 47%, 25%);
 	}
+
+
+
 </style>
 
 <script>
@@ -102,6 +109,10 @@ try {
 			ripple: { lineColor: 'rgba(241, 241, 234, 0.8)', topColor: 'rgba(241, 241, 234, 0.25)', bottomColor: 'rgba(241, 241, 234, 0.05)' },
 			tether: { lineColor: 'rgba(34, 174, 88, 0.8)', topColor: 'rgba(34, 174, 88, 0.25)', bottomColor: 'rgba(34, 174, 88, 0.05)' },
 		}
+
+		/* Responsive support */
+
+		const tabletMediaQuery = window.matchMedia("(width >= 768px)");
 
 		for (const el of elements) {
 			const data = JSON.parse(el.getAttribute("data-chart") || "[]");
@@ -146,7 +157,16 @@ try {
 					}
 				}
 				
-			})	
+			})
+			
+			if (tabletMediaQuery) {
+				chartInstance.applyOptions({
+					rightPriceScale: {
+						visible: true,
+						textColor: 'white'
+					}
+				})
+			}
 
 			const areaSeries = chartInstance.addSeries(AreaSeries, {
 				...areaSeriesOptions[coinName],
