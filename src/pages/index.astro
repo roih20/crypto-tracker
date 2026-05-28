@@ -119,6 +119,14 @@ try {
 						labelVisible: false
 					}
 				},
+				rightPriceScale: {
+					borderVisible: false,
+					visible: false
+				},
+				timeScale: {
+					borderVisible: false,
+					visible: false
+				},
 				grid: {
 					vertLines: {
 						visible: false
@@ -127,20 +135,13 @@ try {
 						visible: false
 					}
 				},
-				rightPriceScale: {
-					visible: false
-					
-				},	
-				timeScale: {
-					visible: false,
-				},
 				layout: {
 					background: {
 						color: 'transparent'
 					}
 				}
 				
-			})
+			})	
 
 			const areaSeries = chartInstance.addSeries(AreaSeries, {
 				...areaSeriesOptions[coinName],
@@ -169,7 +170,6 @@ try {
 						toolTip.style.display = "none";
 						return;
 					}
-					
 					const price = data.value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 					priceElement.textContent = price;
 					toolTip.innerHTML = `<div class="flex flex-wrap"><span class="text-white">${timeStr}</span></div>`

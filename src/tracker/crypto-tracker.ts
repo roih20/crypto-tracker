@@ -40,7 +40,14 @@ const cryptoTracker = async (coins: string[]): Promise<CryptoData[]> => {
 const main = async () => {
   console.log("Starting currency tracker...\n");
   console.log("Fetching data from CoinGecko API...\n");
-  const coins = ["bitcoin", "ethereum", "solana"];
+  const coins = [
+    "bitcoin",
+    "ethereum",
+    "solana",
+    "binancecoin",
+    "ripple",
+    "tether",
+  ];
 
   try {
     const coinsData = await cryptoTracker(coins);
