@@ -96,6 +96,8 @@ try {
 </style>
 
 <script>
+import type { IChartApi } from "lightweight-charts";
+
 	document.addEventListener("DOMContentLoaded", async () => {
 		const { createChart, AreaSeries} = await import("lightweight-charts");
 
@@ -135,14 +137,6 @@ try {
 						labelVisible: false
 					}
 				},
-				rightPriceScale: {
-					borderVisible: false,
-					visible: false
-				},
-				timeScale: {
-					borderVisible: false,
-					visible: false
-				},
 				grid: {
 					vertLines: {
 						visible: false
@@ -158,15 +152,37 @@ try {
 				}
 				
 			})
-			
-			if (tabletMediaQuery) {
-				chartInstance.applyOptions({
-					rightPriceScale: {
-						visible: true,
-						textColor: 'white'
-					}
-				})
+
+			const applyResponsiveOptions = (isTablet: boolean) => {
+				if (!isTablet) {
+					chartInstance.applyOptions({
+						rightPriceScale: {
+							visible: false,
+							borderVisible: false
+						},
+						timeScale: {
+							visible: false,
+							borderVisible: false
+						}
+					})
+				} else {
+					chartInstance.applyOptions({
+						rightPriceScale: {
+							visible: true,
+							borderVisible: false,
+							textColor: 'white'
+						},
+						timeScale: {
+							visible: false
+						}
+					})
+				}
 			}
+
+			applyResponsiveOptions(tabletMediaQuery.matches)
+			tabletMediaQuery.addEventListener("change", (ev) => applyResponsiveOptions(ev.matches))
+			
+
 
 			const areaSeries = chartInstance.addSeries(AreaSeries, {
 				...areaSeriesOptions[coinName],
