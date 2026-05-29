@@ -27,3 +27,5 @@ pnpm-debug.log*
 # supabase
 
 supabase/
+# Local Netlify folder
+.netlify

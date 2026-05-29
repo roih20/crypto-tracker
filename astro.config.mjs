@@ -5,6 +5,9 @@ import netlify from "@astrojs/netlify";
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ["lightweight-charts"],
+    },
   },
   output: "server",
   adapter: netlify(),
