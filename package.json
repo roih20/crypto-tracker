@@ -13,6 +13,7 @@
     "track:crypto": "tsx src/tracker/crypto-tracker.ts"
   },
   "dependencies": {
+    "@astrojs/netlify": "^7.0.11",
     "@supabase/supabase-js": "^2.106.1",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.7",
