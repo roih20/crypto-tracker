@@ -3,8 +3,11 @@ import Layout from "@layouts/Layout.astro";
 import BitcoinLogo from "@assets/svg/bitcoin.svg";
 import EthereumLogo from "@assets/svg/ethereum.svg";
 import SolanaLogo from "@assets/svg/solana.svg";
+import TetherLogo from "@assets/svg/tether.svg"
+import BinanceCoinLogo from "@assets/svg/binancecoin.svg"
+import XrpLogo from "@assets/svg/xrp.svg"
+
 import { getAllRows, type CryptoRow } from "../db/queries";
-import type { SvgComponent } from "astro/types";
 
 process.env.SUPABASE_URL ??= import.meta.env.SUPABASE_URL;
 process.env.SUPABASE_KEY ??= import.meta.env.SUPABASE_KEY;
@@ -36,38 +39,41 @@ try {
 
 <Layout>
 	<main>
-		<header class="flex items-center justify-center py-4 border-b border-gray-700">
-			<h1 class="text-xl font-semibold text-white">CryptoTrack</h1>
+		<header class="flex items-center justify-center py-4 border-b border-gray-700 lg:py-6">
+			<h1 class="text-xl font-semibold text-white lg:text-3xl">CryptoTrack</h1>
 		</header>
-		<section class="p-4">
-			<h2 class="font-medium text-white/90 mb-2 sm:text-lg">Market Overview</h2>
+		<section class="p-4 lg:py-6 xl:px-6 2xl:px-0 2xl:max-w-7xl 2xl:w-full 2xl:m-auto">
+			<h2 class="font-medium text-white/90 mb-2 sm:text-lg lg:text-xl">Market Overview</h2>
 			<p class="text-gray-300 leading-7 text-sm sm:text-base">Track the price of various cryptocurrencies in real time.</p>
 			{chartError ? (
 				<div class="bg-red-500/10 text-red-400 p-4 rounded-lg mt-4">
 					{chartError}
 				</div>
 			) : (
-			 <div class="flex flex-col gap-y-4 mt-4">
+			 <div class="flex flex-col gap-y-4 mt-4 lg:mt-6">
 			  {
 					Object.entries(coins).map(([coin, data]) => (
-						<div class="px-3 py-4 card rounded-lg flex flex-col gap-y-2 sm:h-48 md:h-56">
-							<div class="flex gap-x-3 h-full">
-								<div class="flex flex-col gap-y-2 w-32 sm:gap-x-4 sm:w-44 sm:mt-2 sm:ml-2">
-									<div class="flex items-center gap-x-2">
+						<div class="px-3 py-4 card rounded-lg flex flex-col gap-y-2 sm:h-48 md:h-56 lg:h-64 xl:h-72 2xl:h-80">
+							<div class="flex gap-x-3 h-full lg:gap-x-5">
+								<div class="flex flex-col gap-y-2 w-32 sm:gap-x-4 sm:w-44 sm:mt-2 sm:ml-2 lg:mt-4 lg:gap-y-4 xl:w-56 xl:mt-8 xl:gap-y-7">
+									<div class="flex items-center gap-x-2 lg:gap-x-4">
 										<div class="">
-											{coin === "bitcoin" && <BitcoinLogo class="w-7 h-7 sm:w-9 sm:h-9" />}
-											{coin === "ethereum" && <EthereumLogo class="w-7 h-7 sm:w-9 sm:h-9" />}
-											{coin === "solana" && <SolanaLogo class="w-7 h-7 sm:w-9 sm:h-9" />}
+											{coin === "bitcoin" && <BitcoinLogo class="w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12" />}
+											{coin === "ethereum" && <EthereumLogo class="w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12" />}
+											{coin === "solana" && <SolanaLogo class="w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12" />}
+											{coin === "tether" && <TetherLogo class="w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12"/>}
+											{coin === "binancecoin" && <BinanceCoinLogo class="w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12"/>}
+											{coin === "ripple" && <XrpLogo class="bg-white rounded-full p-1 w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12"/>}
 										</div>
-										<h3 class="text-white font-semibold capitalize sm:text-xl">{coin}</h3>
+										<h3 class="text-white capitalize sm:text-xl xl:text-2xl">{coin}</h3>
 									</div>
 									<div class="flex-1 w-full">
-										<p id={`latest-price-${coin}`} class="text-lg font-medium text-white ml-1 sm:text-2xl">{latestPrices[coin]}</p>
+										<p id={`latest-price-${coin}`} class="text-lg font-light text-white ml-1 sm:text-2xl lg:text-3xl xl:text-4xl">{latestPrices[coin]}</p>
 									</div>
 								</div>
 								<div class="relative flex-1 overflow-hidden">
 									<div id={`chart-${coin}`} class="h-32 w-full sm:h-full" data-chart={JSON.stringify(data)}></div>
-									<div id={`tooltip-${coin}`} class="tooltip top-3 left-3 p-2 rounded-xl text-xs z-20" style="display: none;"></div>
+									<div id={`tooltip-${coin}`} class="tooltip top-0 left-3 p-2 rounded-xl text-xs z-20" style="display: none;"></div>
 								</div>
 							</div>
 						</div>
@@ -96,37 +102,40 @@ try {
 </style>
 
 <script>
-import type { IChartApi } from "lightweight-charts";
 
-	document.addEventListener("DOMContentLoaded", async () => {
-		const { createChart, AreaSeries} = await import("lightweight-charts");
+	type AreaSeriesOptions = {
+		lineColor: string
+		topColor: string
+		bottomColor: string
+	}
 
-		const elements = document.querySelectorAll("[data-chart]");
+	const areaSeriesOptions: Record<string, AreaSeriesOptions> = {
+		bitcoin: { lineColor: 'rgba(240, 165, 55, 1)', topColor: 'rgba(240, 165, 55, 0.25)', bottomColor: 'rgba(240, 165, 55, 0.05)' },
+		ethereum: { lineColor: 'rgba(75, 73, 239, 0.8)', topColor: 'rgba(75, 73, 239, 0.25)', bottomColor: 'rgba(75, 73, 239, 0.05)' },
+		solana: { lineColor: 'rgba(161, 46, 201, 0.8)', topColor: 'rgba(161, 46, 201, 0.25)', bottomColor: 'rgba(161, 46, 201, 0.05)' },
+		binancecoin: { lineColor: 'rgba(242, 240, 58, 0.8)', topColor: 'rgba(242, 240, 58, 0.25)', bottomColor: 'rgba(242, 240, 58, 0.05)' },
+		ripple: { lineColor: 'rgba(241, 241, 234, 0.8)', topColor: 'rgba(241, 241, 234, 0.25)', bottomColor: 'rgba(241, 241, 234, 0.05)' },
+		tether: { lineColor: 'rgba(34, 174, 88, 0.8)', topColor: 'rgba(34, 174, 88, 0.25)', bottomColor: 'rgba(34, 174, 88, 0.05)' },
+	}
 
-		const areaSeriesOptions: Record<string, { lineColor: string, topColor: string, bottomColor: string }> = {
-			bitcoin: { lineColor: 'rgba(240, 165, 55, 1)', topColor: 'rgba(240, 165, 55, 0.25)', bottomColor: 'rgba(240, 165, 55, 0.05)' },
-			ethereum: { lineColor: 'rgba(75, 73, 239, 0.8)', topColor: 'rgba(75, 73, 239, 0.25)', bottomColor: 'rgba(75, 73, 239, 0.05)' },
-			solana: { lineColor: 'rgba(161, 46, 201, 0.8)', topColor: 'rgba(161, 46, 201, 0.25)', bottomColor: 'rgba(161, 46, 201, 0.05)' },
-			binancecoin: { lineColor: 'rgba(242, 240, 58, 0.8)', topColor: 'rgba(242, 240, 58, 0.25)', bottomColor: 'rgba(242, 240, 58, 0.05)' },
-			ripple: { lineColor: 'rgba(241, 241, 234, 0.8)', topColor: 'rgba(241, 241, 234, 0.25)', bottomColor: 'rgba(241, 241, 234, 0.05)' },
-			tether: { lineColor: 'rgba(34, 174, 88, 0.8)', topColor: 'rgba(34, 174, 88, 0.25)', bottomColor: 'rgba(34, 174, 88, 0.05)' },
-		}
+	document.addEventListener("DOMContentLoaded", contentLoaded)
 
-		/* Responsive support */
+	async function contentLoaded() {
+		const { createChart, AreaSeries} = await import('lightweight-charts')
 
-		const tabletMediaQuery = window.matchMedia("(width >= 768px)");
+		const elements = document.querySelectorAll("[data-chart]")
+		const tabletMediaQuery = window.matchMedia("(width >= 768px)")
 
-		for (const el of elements) {
-			const data = JSON.parse(el.getAttribute("data-chart") || "[]");
-			// Extract the coin name from the element's ID (e.g., "chart-bitcoin" -> "bitcoin")
-			const coinName = el.getAttribute("id")?.substring(6).trim()!
+		for (const element of elements) {
+			const data = JSON.parse(element.getAttribute("data-chart") || "[]")
+			const coinName = element.getAttribute("id")?.substring(6).trim()!
 			const parsedData = data.map(({ price, time }: { price: number, time: string }) => ({
 				value: price,
 				time: Math.floor(new Date(time).getTime() / 1000)
 			}))
 			.sort((a: { time: number }, b: { time: number }) => a.time - b.time);
 			
-			const chartInstance = createChart(el as HTMLElement, {
+			const chartInstance = createChart(element as HTMLElement, {
 				autoSize: true,
 				crosshair: {
 					horzLine: {
@@ -148,7 +157,8 @@ import type { IChartApi } from "lightweight-charts";
 				layout: {
 					background: {
 						color: 'transparent'
-					}
+					},
+					textColor: 'white'
 				}
 				
 			})
@@ -162,7 +172,8 @@ import type { IChartApi } from "lightweight-charts";
 						},
 						timeScale: {
 							visible: false,
-							borderVisible: false
+							borderVisible: false,
+							barSpacing: 5
 						}
 					})
 				} else {
@@ -170,10 +181,11 @@ import type { IChartApi } from "lightweight-charts";
 						rightPriceScale: {
 							visible: true,
 							borderVisible: false,
-							textColor: 'white'
 						},
 						timeScale: {
-							visible: false
+							visible: true,
+							borderVisible: true,
+							borderColor: 'rgba(203, 203, 203, 0.25)'
 						}
 					})
 				}
@@ -181,13 +193,21 @@ import type { IChartApi } from "lightweight-charts";
 
 			applyResponsiveOptions(tabletMediaQuery.matches)
 			tabletMediaQuery.addEventListener("change", (ev) => applyResponsiveOptions(ev.matches))
-			
-
 
 			const areaSeries = chartInstance.addSeries(AreaSeries, {
 				...areaSeriesOptions[coinName],
 				lineWidth: 3,
 			});
+
+			areaSeries.priceScale().applyOptions({
+				autoScale: false,
+				scaleMargins: {
+					top: 0.1,
+					bottom: 0.2
+				}
+			})
+
+
 			areaSeries.setData(parsedData);
 
 			const toolTip = document.getElementById(`tooltip-${coinName}`)!;
@@ -215,21 +235,20 @@ import type { IChartApi } from "lightweight-charts";
 					priceElement.textContent = price;
 					toolTip.innerHTML = `<div class="flex flex-wrap"><span class="text-white">${timeStr}</span></div>`
 					let left = param.point.x - toolTip.offsetWidth / 2;
-					if (left + toolTip.offsetWidth > el.clientWidth) {
-						left = el.clientWidth - toolTip.offsetWidth - 10; // 10px padding from the edge
+					if (left + toolTip.offsetWidth > element.clientWidth) {
+						left = element.clientWidth - toolTip.offsetWidth - 10; // 10px padding from the edge
 					} else if (left < 0) {
 						left = 10; // 10px padding from the edge
 					}
 					toolTip.style.display = "block";
 					toolTip.style.left = `${left}px`;
-					toolTip.style.top = `-${toolTipHeight}px`;
+					
 				}
 				
 			})
 
 			chartInstance.timeScale().fitContent();
 		}
-		
-	})
+	}
 </script>
 
